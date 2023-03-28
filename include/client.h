@@ -105,7 +105,7 @@ public:
 
         nng_mqtt_topic_qos subscriptions[] = {
             {.topic = {
-                 .length = strlen(topic),
+                 .length = (uint32_t) strlen(topic),
                  .buf = (uint8_t *)topic},
              .qos = QoS}};
 
