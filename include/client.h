@@ -9,6 +9,9 @@
 #include "msquic.h"
 #include "callback.h"
 
+#include <string>
+#include <vector>
+using namespace std;
 
 
 class QuicClient
@@ -20,15 +23,17 @@ private:
 
 public:
     // constructor
-    QuicClient(const char *url);
+    QuicClient(const string& url);
 
     // destructor
     ~QuicClient();
 
     int set_callbacks(Callbacks *cbs);
     int connect(uint16_t keepalive, bool clean_session);
-    int subscribe(char *topic, uint8_t QoS);
-    int publish(char *topic, char *payload, uint8_t QoS, bool dup, bool retain);
+    int subscribe(const string& topic, uint8_t QoS);
+    int publish(const string& topic, uint8_t *payload, uint32_t size, uint8_t QoS, bool dup, bool retain);
+
+    int publish(const string& topic, const string& payload, uint8_t QoS, bool dup, bool retain);
 
     static int on_connected(void *rmsg, void *arg)
     {

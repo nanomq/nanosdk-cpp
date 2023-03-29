@@ -1,13 +1,13 @@
 #include "client.h"
 #include <iostream>
-using namespace std;
 
 
-QuicClient::QuicClient(const char *url)
+
+QuicClient::QuicClient(const string& url)
 {
 
     int rv;
-    if ((rv = nng_mqtt_quic_client_open(&this->sock, url)) != 0)
+    if ((rv = nng_mqtt_quic_client_open(&this->sock, url.c_str())) != 0)
     {
         cerr << "Error in Quic client open. Return code: " << rv << endl;
     }
@@ -45,7 +45,7 @@ int QuicClient::connect(uint16_t keepalive, bool clean_session)
     return rc;
 }
 
-int QuicClient::subscribe(char *topic, uint8_t QoS)
+int QuicClient::subscribe(const string& topic, uint8_t QoS)
 {
     nng_msg *msg;
     int rc = 0;
@@ -56,8 +56,8 @@ int QuicClient::subscribe(char *topic, uint8_t QoS)
 
     nng_mqtt_topic_qos subscriptions[] = {
         {.topic = {
-             .length = (uint32_t)strlen(topic),
-             .buf = (uint8_t *)topic},
+             .length = (uint32_t)topic.length(),
+             .buf = (uint8_t *)topic.c_str()},
          .qos = QoS}};
 
     nng_mqtt_msg_set_subscribe_topics(msg, subscriptions, count);
@@ -69,22 +69,27 @@ int QuicClient::subscribe(char *topic, uint8_t QoS)
     return rc;
 }
 
-int QuicClient::publish(char *topic, char *payload, uint8_t QoS, bool dup, bool retain)
+int QuicClient::publish(const string& topic, uint8_t *payload, uint32_t size, uint8_t qos, bool dup, bool retain)
 {
     nng_msg *msg;
     int rc = 0;
     nng_mqtt_msg_alloc(&msg, 0);
     nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_PUBLISH);
     nng_mqtt_msg_set_publish_dup(msg, dup);
-    nng_mqtt_msg_set_publish_qos(msg, QoS);
+    nng_mqtt_msg_set_publish_qos(msg, qos);
     nng_mqtt_msg_set_publish_retain(msg, retain);
-    nng_mqtt_msg_set_publish_topic(msg, topic);
+    nng_mqtt_msg_set_publish_topic(msg, topic.c_str());
     nng_mqtt_msg_set_publish_payload(
-        msg, (uint8_t *)payload, strlen(payload));
+        msg, payload, size);
     rc = nng_sendmsg(this->sock, msg, NNG_FLAG_ALLOC);
     if (rc != 0)
     {
         cerr << "MQTT_NNG publish error: " << nng_strerror(rc) << endl;
     }
     return rc;
+}
+
+int QuicClient::publish(const string& topic, const string& payload, uint8_t qos, bool dup, bool retain)
+{
+    return publish(topic, (uint8_t*)payload.c_str(), payload.size(), qos, dup, retain);
 }
