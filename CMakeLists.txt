@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g -O0 -std=c++11 -D_GLIBCXX_USE_N
 
 
 set(SRC "src/client.cpp")
-add_library(nano SHARED "${SRC}")
+add_library(nano STATIC "${SRC}")
 target_include_directories(nano PUBLIC include)
 target_link_libraries(nano nng)
 
@@ -16,5 +16,5 @@ add_dependencies(nano nng)
 
 # Build Client
 add_executable(client src/example.cpp)
-target_link_libraries(client nano nng)
+target_link_libraries(client nano)
 

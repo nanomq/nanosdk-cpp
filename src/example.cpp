@@ -1,8 +1,7 @@
 #include "client.h"
 #include <iostream>
 #include <thread>
-#include <cstdarg>
-#include <cstring>
+using namespace std;
 
 class Cbs : public virtual Callbacks
 {
