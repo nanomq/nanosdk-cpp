@@ -1,4 +1,5 @@
 #include "client.h"
+#include "message.h"
 #include <iostream>
 #include <thread>
 using namespace std;
@@ -36,24 +37,36 @@ public:
 int main()
 {
     char url[] = "mqtt-quic://13.49.223.253:14567";
-    char topic[] = "topic";
-    char payload[] = "payload";
-    int keepalive = 30;
-    bool clean_session = false;
-    Cbs cbs;
-    int qos = 1;
-
     QuicClient client(url);
+
+    Cbs cbs;
     client.set_callbacks(&cbs);
-    client.connect(keepalive, clean_session);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    client.subscribe(topic, qos);
+
+    ConnMessage cmsg;
+    cmsg.client_id("clientid")
+        .clean_session(false)
+        .keep_alive(30);
+
+    client.connect(cmsg);
+
+    SubMessage smsg;
+    SubMessage::topics topics = {
+        {"topic1", 1},
+        {"topic2", 1},
+    };
+
+    smsg.topic_with_qos(topics);
+    client.subscribe(smsg);
 
     while (true)
     {
-        cout << "Publish message" << endl;
-        client.publish(topic, payload, 0, true, false);
-        cout << "Publish message done" << endl;
+        PubMessage pmsg;
+        pmsg.dup(false)
+            .payload((uint8_t *)"aaaaa", strlen("aaaaa"))
+            .topic("topic1")
+            .retain(true)
+            .qos(1);
+        client.publish(pmsg);
         std::this_thread::sleep_for(std::chrono::seconds(5));
     }
 
