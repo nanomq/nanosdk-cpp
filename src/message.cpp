@@ -157,7 +157,7 @@ SubMessage & SubMessage::topic_with_qos(const SubMessage::topics& ts)
 
 SubMessage & SubMessage::topic_with_qos(const std::string& topic, int qos)
 {
-    int count = 2;
+    int count = 1;
     nng_mqtt_topic_qos subscriptions[] = {
         {
             .topic =
@@ -177,16 +177,18 @@ SubMessage & SubMessage::topic_with_qos(const std::string& topic, int qos)
 // get
 const SubMessage::topics &SubMessage::topic_with_qos()
 {
-    uint32_t len = 0;
+    if (vts.empty()) {
+        uint32_t len = 0;
 
-    nng_mqtt_topic_qos* tq = nng_mqtt_msg_get_subscribe_topics(msg, &len);
-    for (uint32_t i = 0; i < len; i++) {
-        std::string topic = std::string((char*) tq[i].topic.buf, tq[i].topic.length);
-        SubMessage::topic_qos ts = {
-            topic,
-            tq[i].qos
-        };
-        vts.push_back(ts);
+        nng_mqtt_topic_qos* tq = nng_mqtt_msg_get_subscribe_topics(msg, &len);
+        for (uint32_t i = 0; i < len; i++) {
+            std::string topic = std::string((char*) tq[i].topic.buf, tq[i].topic.length);
+            SubMessage::topic_qos ts = {
+                topic,
+                tq[i].qos
+            };
+            vts.push_back(ts);
+        }
     }
 
     return vts;
