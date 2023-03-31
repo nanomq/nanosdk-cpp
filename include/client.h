@@ -8,6 +8,7 @@
 #include <nng/mqtt/mqtt_client.h>
 #include "msquic.h"
 #include "callback.h"
+#include "message.h"
 
 #include <string>
 #include <vector>
@@ -30,10 +31,12 @@ public:
 
     int set_callbacks(Callbacks *cbs);
     int connect(uint16_t keepalive, bool clean_session);
+    int connect(const ConnMessage &cmsg);
     int subscribe(const string& topic, uint8_t QoS);
+    int subscribe(const SubMessage &smsg);
     int publish(const string& topic, uint8_t *payload, uint32_t size, uint8_t QoS, bool dup, bool retain);
-
     int publish(const string& topic, const string& payload, uint8_t QoS, bool dup, bool retain);
+    int publish(const PubMessage &pmsg);
 
     static int on_connected(void *rmsg, void *arg)
     {

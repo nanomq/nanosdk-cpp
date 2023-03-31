@@ -45,6 +45,16 @@ int QuicClient::connect(uint16_t keepalive, bool clean_session)
     return rc;
 }
 
+int QuicClient::connect(const ConnMessage &cmsg)
+{
+    int rc = 0;
+    if ((rc = nng_sendmsg(this->sock, cmsg.get_message(), NNG_FLAG_ALLOC) != 0))
+    {
+        cerr << "MQTT_NNG publish error: " << nng_strerror(rc) << endl;
+    }
+    return rc;
+}
+
 int QuicClient::subscribe(const string& topic, uint8_t QoS)
 {
     nng_msg *msg;
@@ -62,6 +72,16 @@ int QuicClient::subscribe(const string& topic, uint8_t QoS)
 
     nng_mqtt_msg_set_subscribe_topics(msg, subscriptions, count);
     rc = nng_sendmsg(this->sock, msg, NNG_FLAG_ALLOC);
+    if (rc != 0)
+    {
+        cerr << "MQTT_NNG subscribe error: " << nng_strerror(rc) << endl;
+    }
+    return rc;
+}
+
+int QuicClient::subscribe(const SubMessage &smsg)
+{
+    int rc = nng_sendmsg(this->sock, smsg.get_message(), NNG_FLAG_ALLOC);
     if (rc != 0)
     {
         cerr << "MQTT_NNG subscribe error: " << nng_strerror(rc) << endl;
@@ -87,6 +107,18 @@ int QuicClient::publish(const string& topic, uint8_t *payload, uint32_t size, ui
         cerr << "MQTT_NNG publish error: " << nng_strerror(rc) << endl;
     }
     return rc;
+}
+
+int QuicClient::publish(const PubMessage &pmsg)
+{
+    int rc = nng_sendmsg(this->sock, pmsg.get_message(), NNG_FLAG_ALLOC);
+    if (rc != 0)
+    {
+        cerr << "MQTT_NNG publish error: " << nng_strerror(rc) << endl;
+    }
+    return rc;
+
+
 }
 
 int QuicClient::publish(const string& topic, const string& payload, uint8_t qos, bool dup, bool retain)
