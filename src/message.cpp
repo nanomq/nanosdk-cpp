@@ -2,7 +2,6 @@
 #include <nng/supplemental/util/platform.h>
 #include <nng/mqtt/mqtt_quic.h>
 #include <nng/mqtt/mqtt_client.h>
-#include <iostream>
 
 nng_msg *Message::get_message() const
 {
@@ -201,7 +200,7 @@ PubMessage::PubMessage()
 
 PubMessage::~PubMessage()
 {
-    nng_msg_free(msg);
+    // nng_msg_free(msg);
 }
 
 PubMessage &PubMessage::qos(uint8_t qos)
