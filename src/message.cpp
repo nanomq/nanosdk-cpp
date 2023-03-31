@@ -160,8 +160,8 @@ SubMessage & SubMessage::topic_with_qos(const std::string& topic, int qos)
 {
     int count = 2;
     nng_mqtt_topic_qos subscriptions[] = {
-        {   
-            .topic = 
+        {
+            .topic =
             {
                 .length = (uint32_t)topic.length(),
                 .buf = (uint8_t *)topic.c_str()
@@ -178,7 +178,7 @@ SubMessage & SubMessage::topic_with_qos(const std::string& topic, int qos)
 // get
 const SubMessage::topics &SubMessage::topic_with_qos()
 {
-    uint32_t len = 0; 
+    uint32_t len = 0;
 
     nng_mqtt_topic_qos* tq = nng_mqtt_msg_get_subscribe_topics(msg, &len);
     for (uint32_t i = 0; i < len; i++) {
