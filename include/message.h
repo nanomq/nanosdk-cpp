@@ -4,6 +4,7 @@
 #include <nng/nng.h>
 #include <string>
 #include <vector>
+#include <tuple>
 
 class Message
 {
@@ -23,11 +24,10 @@ private:
     std::string m_will_topic;
 
 public:
-    ConnMessage(void);
+    ConnMessage();
     ~ConnMessage();
 
     // Set
-    ConnMessage &keepalive(uint16_t keepalive);
     ConnMessage &proto_version(uint8_t);
     ConnMessage &keep_alive(uint16_t);
     ConnMessage &client_id(const std::string &);
@@ -40,7 +40,6 @@ public:
     ConnMessage &will_qos(uint8_t);
 
     // Get
-    uint16_t keepalive() const;
     const std::string &user_name() const;
     const std::string &password() const;
     const std::string &client_id() const;
@@ -52,4 +51,25 @@ public:
     bool will_retain() const;
     uint8_t will_qos() const;
 };
+
+class SubMessage : public Message
+{
+public:
+
+    using topic_qos = std::tuple<const std::string, int>;
+    using topics = std::vector<topic_qos>;
+    SubMessage();
+    ~SubMessage();
+
+    // set
+    SubMessage &topic_with_qos(const topics&);
+    SubMessage &topic_with_qos(const std::string&, int);
+    // get
+    const topics &topic_with_qos();
+private:
+    /* data */
+    topics vts;
+};
+
+
 #endif // MQTT_MESSAGE_H
