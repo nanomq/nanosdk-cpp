@@ -2,6 +2,7 @@
 #include <nng/supplemental/util/platform.h>
 #include <nng/mqtt/mqtt_quic.h>
 #include <nng/mqtt/mqtt_client.h>
+#include <iostream>
 
 nng_msg *Message::get_message() const
 {
@@ -19,9 +20,9 @@ ConnMessage::~ConnMessage()
     nng_msg_free(msg);
 }
 
-ConnMessage &ConnMessage::keepalive(uint16_t keepalive)
+ConnMessage &ConnMessage::keep_alive(uint16_t keep_alive)
 {
-    nng_mqtt_msg_set_connect_keep_alive(msg, keepalive);
+    nng_mqtt_msg_set_connect_keep_alive(msg, keep_alive);
     return *this;
 }
 
@@ -76,11 +77,6 @@ ConnMessage &ConnMessage::will_qos(uint8_t qos)
 }
 
 // Get
-uint16_t ConnMessage::keepalive() const
-{
-    return nng_mqtt_msg_get_connect_keep_alive(msg);
-}
-
 const std::string &ConnMessage::user_name() const
 {
     return m_username;
@@ -129,4 +125,72 @@ uint8_t ConnMessage::will_qos() const
 uint8_t *ConnMessage::will_msg(uint32_t *len) const
 {
     return nng_mqtt_msg_get_connect_will_msg(msg, len);
+}
+
+SubMessage::SubMessage()
+{
+    nng_mqtt_msg_alloc(&msg, 0);
+    nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_SUBSCRIBE);
+}
+
+SubMessage::~SubMessage()
+{
+    nng_msg_free(msg);
+}
+
+// set
+SubMessage & SubMessage::topic_with_qos(const SubMessage::topics& ts)
+{
+    nng_mqtt_topic_qos subscriptions[ts.size()] = { 0 };
+    int index = 0;
+    for (auto &e : ts) {
+        subscriptions[index].topic.buf = (uint8_t*) std::get<0>(e).c_str();
+        subscriptions[index].topic.length = std::get<0>(e).length();
+        subscriptions[index].qos = std::get<1>(e);
+        index++;
+
+    }
+
+    nng_mqtt_msg_set_subscribe_topics(msg, subscriptions, ts.size());
+    return *this;
+
+}
+
+SubMessage & SubMessage::topic_with_qos(const std::string& topic, int qos)
+{
+    int count = 2;
+    nng_mqtt_topic_qos subscriptions[] = {
+        {   
+            .topic = 
+            {
+                .length = (uint32_t)topic.length(),
+                .buf = (uint8_t *)topic.c_str()
+            },
+            .qos = (uint8_t) qos
+        }
+    };
+
+    nng_mqtt_msg_set_subscribe_topics(msg, subscriptions, count);
+    return *this;
+
+}
+
+// get
+const SubMessage::topics &SubMessage::topic_with_qos()
+{
+    uint32_t len = 0; 
+
+    nng_mqtt_topic_qos* tq = nng_mqtt_msg_get_subscribe_topics(msg, &len);
+    for (uint32_t i = 0; i < len; i++) {
+        std::string topic = std::string((char*) tq[i].topic.buf, tq[i].topic.length);
+        SubMessage::topic_qos ts = {
+            topic,
+            tq[i].qos
+        };
+        vts.push_back(ts);
+    }
+
+    return vts;
+
+
 }
