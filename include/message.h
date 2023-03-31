@@ -71,5 +71,29 @@ private:
     topics vts;
 };
 
+class PubMessage : public Message
+{
+private:
+    std::string m_topic;
+public:
+    PubMessage();
+    ~PubMessage();
+
+// set
+PubMessage &qos(uint8_t);
+PubMessage &retain(bool);
+PubMessage &dup(bool);
+PubMessage &topic(const std::string&);
+PubMessage &payload(uint8_t *, uint32_t);
+
+// get
+uint8_t qos() const;
+bool retain() const;
+bool dup() const;
+const std::string &topic() const;
+const uint8_t * payload(uint32_t *) const;
+
+};
+
 
 #endif // MQTT_MESSAGE_H
