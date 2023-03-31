@@ -191,6 +191,71 @@ const SubMessage::topics &SubMessage::topic_with_qos()
     }
 
     return vts;
+}
 
+PubMessage::PubMessage()
+{
+    nng_mqtt_msg_alloc(&msg, 0);
+    nng_mqtt_msg_set_packet_type(msg, NNG_MQTT_PUBLISH);
+}
 
+PubMessage::~PubMessage()
+{
+    nng_msg_free(msg);
+}
+
+PubMessage &PubMessage::qos(uint8_t qos)
+{
+    nng_mqtt_msg_set_publish_qos(msg, qos);
+    return *this;
+}
+
+PubMessage &PubMessage::retain(bool retain)
+{
+    nng_mqtt_msg_set_publish_retain(msg, retain);
+    return *this;
+}
+
+PubMessage &PubMessage::dup(bool dup)
+{
+    nng_mqtt_msg_set_publish_dup(msg, dup);
+    return *this;
+}
+
+PubMessage &PubMessage::topic(const std::string &topic)
+{
+    nng_mqtt_msg_set_publish_topic(msg, topic.c_str());
+    m_topic = std::move(topic);
+    return *this;
+}
+
+PubMessage &PubMessage::payload(uint8_t *payload, uint32_t len)
+{
+    nng_mqtt_msg_set_publish_payload(msg, payload, len);
+    return *this;
+}
+
+uint8_t PubMessage::qos() const
+{
+    return nng_mqtt_msg_get_publish_qos(msg);
+}
+
+bool PubMessage::retain() const
+{
+    return nng_mqtt_msg_get_publish_retain(msg);
+}
+
+bool PubMessage::dup() const
+{
+    return nng_mqtt_msg_get_publish_dup(msg);
+}
+
+const std::string &PubMessage::topic() const
+{
+    return m_topic;
+}
+
+const uint8_t *PubMessage::payload(uint32_t *len) const
+{
+    return nng_mqtt_msg_get_publish_payload(msg, len);
 }
