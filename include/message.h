@@ -1,6 +1,7 @@
 #ifndef MQTT_MESSAGE_H
 #define MQTT_MESSAGE_H
 
+#include "property.h"
 #include <nng/nng.h>
 #include <string>
 #include <vector>
@@ -38,6 +39,7 @@ public:
     ConnMessage &will_msg(uint8_t *, uint32_t);
     ConnMessage &will_retain(bool);
     ConnMessage &will_qos(uint8_t);
+    ConnMessage &property(const Property &);
 
     // Get
     const std::string &user_name() const;
@@ -55,17 +57,18 @@ public:
 class SubMessage : public Message
 {
 public:
-
     using topic_qos = std::tuple<const std::string, int>;
     using topics = std::vector<topic_qos>;
     SubMessage();
     ~SubMessage();
 
     // set
-    SubMessage &topic_with_qos(const topics&);
-    SubMessage &topic_with_qos(const std::string&, int);
+    SubMessage &topic_with_qos(const topics &);
+    SubMessage &topic_with_qos(const std::string &, int);
+    SubMessage &property(const Property &);
     // get
     const topics &topic_with_qos();
+
 private:
     /* data */
     topics vts;
@@ -75,25 +78,25 @@ class PubMessage : public Message
 {
 private:
     std::string m_topic;
+
 public:
     PubMessage();
     ~PubMessage();
 
-// set
-PubMessage &qos(uint8_t);
-PubMessage &retain(bool);
-PubMessage &dup(bool);
-PubMessage &topic(const std::string&);
-PubMessage &payload(uint8_t *, uint32_t);
+    // set
+    PubMessage &qos(uint8_t);
+    PubMessage &retain(bool);
+    PubMessage &dup(bool);
+    PubMessage &topic(const std::string &);
+    PubMessage &payload(uint8_t *, uint32_t);
+    PubMessage &property(const Property &);
 
-// get
-uint8_t qos() const;
-bool retain() const;
-bool dup() const;
-const std::string &topic() const;
-const uint8_t * payload(uint32_t *) const;
-
+    // get
+    uint8_t qos() const;
+    bool retain() const;
+    bool dup() const;
+    const std::string &topic() const;
+    const uint8_t *payload(uint32_t *) const;
 };
-
 
 #endif // MQTT_MESSAGE_H
