@@ -21,10 +21,11 @@ class QuicClient
 private:
     nng_socket sock;
     Callbacks *cbs;
+    uint8_t ver;
 
 public:
     // constructor
-    QuicClient(const string& url);
+    QuicClient(const string& url, uint8_t version);
 
     // destructor
     ~QuicClient();

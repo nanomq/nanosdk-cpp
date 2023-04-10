@@ -1,16 +1,30 @@
 #include "client.h"
 #include <iostream>
 
-
-
-QuicClient::QuicClient(const string& url)
+QuicClient::QuicClient(const string &url, uint8_t version)
 {
 
     int rv;
-    if ((rv = nng_mqtt_quic_client_open(&this->sock, url.c_str())) != 0)
+    switch (version)
     {
-        cerr << "Error in Quic client open. Return code: " << rv << endl;
+    case MQTT_PROTOCOL_VERSION_v311:
+    case MQTT_PROTOCOL_VERSION_v31:
+        if ((rv = nng_mqtt_quic_client_open(&this->sock, url.c_str())) != 0)
+        {
+            cerr << "Error in Quic client open. Return code: " << rv << endl;
+        }
+        break;
+    case MQTT_PROTOCOL_VERSION_v5:
+        if ((rv = nng_mqttv5_quic_client_open(&this->sock, url.c_str())) != 0)
+        {
+            cerr << "Error in Quic client open. Return code: " << rv << endl;
+        }
+        break;
+    default:
+        cerr << "Error client version." << endl;
+        break;
     }
+    ver = version;
 }
 
 QuicClient::~QuicClient()
@@ -48,6 +62,8 @@ int QuicClient::connect(uint16_t keepalive, bool clean_session)
 int QuicClient::connect(const ConnMessage &cmsg)
 {
     int rc = 0;
+    nng_msg *msg = cmsg.get_message();
+    nng_mqtt_msg_set_connect_proto_version(msg, ver);
     if ((rc = nng_sendmsg(this->sock, cmsg.get_message(), NNG_FLAG_ALLOC) != 0))
     {
         cerr << "MQTT_NNG publish error: " << nng_strerror(rc) << endl;
@@ -55,7 +71,7 @@ int QuicClient::connect(const ConnMessage &cmsg)
     return rc;
 }
 
-int QuicClient::subscribe(const string& topic, uint8_t QoS)
+int QuicClient::subscribe(const string &topic, uint8_t QoS)
 {
     nng_msg *msg;
     int rc = 0;
@@ -89,7 +105,7 @@ int QuicClient::subscribe(const SubMessage &smsg)
     return rc;
 }
 
-int QuicClient::publish(const string& topic, uint8_t *payload, uint32_t size, uint8_t qos, bool dup, bool retain)
+int QuicClient::publish(const string &topic, uint8_t *payload, uint32_t size, uint8_t qos, bool dup, bool retain)
 {
     nng_msg *msg;
     int rc = 0;
@@ -117,11 +133,9 @@ int QuicClient::publish(const PubMessage &pmsg)
         cerr << "MQTT_NNG publish error: " << nng_strerror(rc) << endl;
     }
     return rc;
-
-
 }
 
-int QuicClient::publish(const string& topic, const string& payload, uint8_t qos, bool dup, bool retain)
+int QuicClient::publish(const string &topic, const string &payload, uint8_t qos, bool dup, bool retain)
 {
-    return publish(topic, (uint8_t*)payload.c_str(), payload.size(), qos, dup, retain);
+    return publish(topic, (uint8_t *)payload.c_str(), payload.size(), qos, dup, retain);
 }
