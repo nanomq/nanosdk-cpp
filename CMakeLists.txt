@@ -12,7 +12,7 @@ if(ASAN)
     add_link_options(-fsanitize=address)
 endif(ASAN)
 
-set(SRC "src/client.cpp" "src/message.cpp")
+set(SRC "src/client.cpp" "src/message.cpp" "src/property.cpp")
 add_library(nano STATIC "${SRC}")
 target_include_directories(nano PUBLIC include)
 target_link_libraries(nano nng)
@@ -20,8 +20,6 @@ target_link_libraries(nano nng)
 add_subdirectory(NanoSDK)
 add_dependencies(nano nng)
 
-
-# Build Client
-add_executable(client src/example.cpp)
-target_link_libraries(client nano)
-
+# Build Sync Client
+add_executable(sync_client src/demo/sync_client.cpp)
+target_link_libraries(sync_client nano)
