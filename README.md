@@ -16,6 +16,7 @@ cd nanosdk-cpp
 git submodule update --init --recursive
 cd NanoSDK/extern/msquic/
 mkdir build
+cd build
 cmake ..
 make -j8
 make install
@@ -25,6 +26,7 @@ make install
 ```shell
 cd nanosdk-cpp
 mkdir build
+cd build
 cmake -DNNG_ENABLE_QUIC=ON ..
 make -j8
 ```

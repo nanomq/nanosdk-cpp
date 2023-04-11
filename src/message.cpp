@@ -75,6 +75,12 @@ ConnMessage &ConnMessage::will_qos(uint8_t qos)
     return *this;
 }
 
+ConnMessage &ConnMessage::property(const Property &p)
+{
+    nng_mqtt_msg_set_connect_property(msg, p.get_property());
+    return *this;
+}
+
 // Get
 const std::string &ConnMessage::user_name() const
 {
@@ -138,55 +144,56 @@ SubMessage::~SubMessage()
 }
 
 // set
-SubMessage & SubMessage::topic_with_qos(const SubMessage::topics& ts)
+SubMessage &SubMessage::topic_with_qos(const SubMessage::topics &ts)
 {
-    nng_mqtt_topic_qos subscriptions[ts.size()] = { 0 };
+    nng_mqtt_topic_qos subscriptions[ts.size()] = {0};
     int index = 0;
-    for (auto &e : ts) {
-        subscriptions[index].topic.buf = (uint8_t*) std::get<0>(e).c_str();
+    for (auto &e : ts)
+    {
+        subscriptions[index].topic.buf = (uint8_t *)std::get<0>(e).c_str();
         subscriptions[index].topic.length = std::get<0>(e).length();
         subscriptions[index].qos = std::get<1>(e);
         index++;
-
     }
 
     nng_mqtt_msg_set_subscribe_topics(msg, subscriptions, ts.size());
     return *this;
-
 }
 
-SubMessage & SubMessage::topic_with_qos(const std::string& topic, int qos)
+SubMessage &SubMessage::topic_with_qos(const std::string &topic, int qos)
 {
     int count = 1;
     nng_mqtt_topic_qos subscriptions[] = {
-        {
-            .topic =
-            {
-                .length = (uint32_t)topic.length(),
-                .buf = (uint8_t *)topic.c_str()
-            },
-            .qos = (uint8_t) qos
-        }
-    };
+        {.topic =
+             {
+                 .length = (uint32_t)topic.length(),
+                 .buf = (uint8_t *)topic.c_str()},
+         .qos = (uint8_t)qos}};
 
     nng_mqtt_msg_set_subscribe_topics(msg, subscriptions, count);
     return *this;
+}
 
+SubMessage &SubMessage::property(const Property &p)
+{
+    nng_mqtt_msg_set_subscribe_property(msg, p.get_property());
+    return *this;
 }
 
 // get
 const SubMessage::topics &SubMessage::topic_with_qos()
 {
-    if (vts.empty()) {
+    if (vts.empty())
+    {
         uint32_t len = 0;
 
-        nng_mqtt_topic_qos* tq = nng_mqtt_msg_get_subscribe_topics(msg, &len);
-        for (uint32_t i = 0; i < len; i++) {
-            std::string topic = std::string((char*) tq[i].topic.buf, tq[i].topic.length);
+        nng_mqtt_topic_qos *tq = nng_mqtt_msg_get_subscribe_topics(msg, &len);
+        for (uint32_t i = 0; i < len; i++)
+        {
+            std::string topic = std::string((char *)tq[i].topic.buf, tq[i].topic.length);
             SubMessage::topic_qos ts = {
                 topic,
-                tq[i].qos
-            };
+                tq[i].qos};
             vts.push_back(ts);
         }
     }
@@ -233,6 +240,12 @@ PubMessage &PubMessage::topic(const std::string &topic)
 PubMessage &PubMessage::payload(uint8_t *payload, uint32_t len)
 {
     nng_mqtt_msg_set_publish_payload(msg, payload, len);
+    return *this;
+}
+
+PubMessage &PubMessage::property(const Property &p)
+{
+    nng_mqtt_msg_set_publish_property(msg, p.get_property());
     return *this;
 }
 
