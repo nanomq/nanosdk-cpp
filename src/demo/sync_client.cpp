@@ -83,7 +83,7 @@ int main()
     client.subscribe(smsg);
 
     int i = 0;
-    while (i < 1)
+    while (true)
     {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         string payload = "payload" + std::to_string(i);
@@ -91,7 +91,6 @@ int main()
         i++;
         Property pp;
         pp.append_strpair(USER_PROPERTY, "key", "val");
-        pp.append_u16(TOPIC_ALIAS, 10);
 
         pmsg.dup(false)
             .payload((uint8_t *)payload.c_str(), payload.length())
@@ -100,20 +99,6 @@ int main()
             .qos(2);
         client.publish(pmsg);
     }
-
-    PubMessage _pmsg;
-    Property _pp;
-    string _payload = "this is a test for topic alias.";
-    _pp.append_strpair(USER_PROPERTY, "key", "val");
-    _pp.append_u16(TOPIC_ALIAS, 10);
-
-    _pmsg.dup(false)
-        .payload((uint8_t *)_payload.c_str(), _payload.length())
-        .property(_pp)
-        .qos(2);
-    client.publish(_pmsg);
-
-    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     cerr << "Done." << endl;
     return 0;
