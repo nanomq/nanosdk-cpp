@@ -5,7 +5,7 @@ This project is a cpp wrapper for [NanoSDK](https://github.com/emqx/NanoSDK).
 - install depencies
 ```shell
 apt update
-apt intstall cmake g++
+apt install cmake g++
 apt install libssl-dev
 ```
 - build && install msquic
