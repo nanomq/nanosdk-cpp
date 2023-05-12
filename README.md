@@ -34,5 +34,5 @@ make -j8
 
 ### RUN
 ```shell
-./client
+./sync_client
 ```
