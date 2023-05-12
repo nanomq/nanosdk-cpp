@@ -1,4 +1,5 @@
 #include "message.h"
+#include <string.h>
 #include <nng/supplemental/util/platform.h>
 #include <nng/mqtt/mqtt_quic.h>
 #include <nng/mqtt/mqtt_client.h>
@@ -146,7 +147,8 @@ SubMessage::~SubMessage()
 // set
 SubMessage &SubMessage::topic_with_qos(const SubMessage::topics &ts)
 {
-    nng_mqtt_topic_qos subscriptions[ts.size()] = {0};
+    nng_mqtt_topic_qos subscriptions[ts.size()];
+    memset(subscriptions, 0, ts.size() * sizeof(nng_mqtt_topic_qos));
     int index = 0;
     for (auto &e : ts)
     {
